@@ -3,6 +3,7 @@
 :root {
     --tooltip-color: #212121;
     --text: #f1feec;
+    --text-secondary: #b3b1b1;
     --background: #1f211e;
     --primary: #26c550;
     --secondary: #0d4e13;
@@ -18,6 +19,7 @@
     --h4: 1.777rem;
     --h5: 1.333rem;
     --small: 0.750rem;
+    --nav-font: 1.15rem;
 
     --snappy-bez: cubic-bezier(0.13, 1.17, 0.3, 0.99);
 
@@ -72,6 +74,7 @@ small {font-size: 0.750rem; /* 12px */}
 /* navbar stuff */
 .navbar {
     /* @media screen and (max-width: 1000px) */
+    font-size: var(--nav-font);
     flex-wrap: wrap;
     padding: 10px 20px;
     top: 0;
@@ -118,14 +121,14 @@ small {font-size: 0.750rem; /* 12px */}
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 10%;
+    gap: 20%;
     justify-content: flex-end;
 }
 .user-flow-btn {
+    font-size: var(--nav-font) !important;
     height: 48;
-    font-size: 1.15rem;
     font-weight: 500;
-    background-position: 0 -99.99%;
+    background-position: 0 -99.84%;
     background-size: 100% 200%;
     background-image: linear-gradient(to top, var(--primary) 50%, var(--accent) 50%);
     /* I USED CHROME DEV TOOLS TO FIND A NICE BEZIER CURVE */
@@ -134,11 +137,29 @@ small {font-size: 0.750rem; /* 12px */}
 .user-flow-btn:hover {
     background-position: 0 0;
 }
+#profile-link {
+    color: var(--text);
+    border: 1.5px solid var(--text);
+    background-image: linear-gradient(to top, var(--background) 50%, #a5a4a4 50%);
+    transition-property: color, background-position;
+    height: 50px;
+}
+#profile-link:hover {
+    color: var(--background);
+}
 #login-btn {
     background-image: linear-gradient(to top, var(--primary) 50%, var(--accent) 50%);
 }
 #logout-btn {
     background-image: linear-gradient(to top, var(--danger) 50%, var(--danger-accent) 50%);
+}
+.nav-link {
+    font-size: inherit;
+    color: var(--text-secondary);
+    transition: var(--snappy-bez) color .7s;
+}
+.nav-link:hover {
+    color: var(--text);
 }
 
 form {
@@ -184,7 +205,7 @@ form {
     justify-content: start;
 }
 
-button {
+button, .btn {
     padding: 0.5em 2em;
     border-radius: 6px;
     border: none;
@@ -221,9 +242,10 @@ button {
 }
 
 input[type=text] {
+    border-radius: 4px;
     margin: .5rem;
     width: var(--input-width);
-    height: 2rem;
+    height: 2.1rem;
 }
 
 .invalid-input {
