@@ -1,0 +1,375 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:300|Poppins:400|Poppins:500|Poppins:600|Poppins:700|Poppins:800');
+
+:root {
+    --tooltip-color: #212121;
+    --text: #f1feec;
+    --background: #1f211e;
+    --primary: #26c550;
+    --secondary: #0d4e13;
+    --accent: #96e48b;
+
+    --danger: #c03838;
+    --danger-accent: #e05f5f;
+
+    --p: 1rem;
+    --h1: 4.210rem;
+    --h2: 3.158rem;
+    --h3: 2.369rem;
+    --h4: 1.777rem;
+    --h5: 1.333rem;
+    --small: 0.750rem;
+
+    --snappy-bez: cubic-bezier(0.13, 1.17, 0.3, 0.99);
+
+    --input-width: 28vw;
+}
+
+* {
+    font-family: 'Poppins';
+    /* font-family: Mukta, sans-serif; */
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 100%; /* 16px */
+    scroll-behavior: smooth;
+}
+/* resize: both; */
+body {
+    /* box-sizing: border-box; */
+    background: var(--background);
+    color: var(--text);
+    margin: 0 auto;
+    padding: 1rem;
+    font-weight: 400;
+    line-height: 1.3;
+}
+body::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
+
+h1, h2, h3, h4, h5 {
+    /* font-family: 'Poppins'; */
+    font-weight: 700;
+}
+
+h1 {font-size: 4.210rem; /* 67.36px */}
+
+h2 {font-size: 3.158rem; /* 50.56px */}
+
+h3 {font-size: 2.369rem; /* 37.92px */}
+
+h4 {font-size: 1.777rem; /* 28.48px */}
+
+h5 {font-size: 1.333rem; /* 21.28px */}
+
+small {font-size: 0.750rem; /* 12px */}
+
+.swal2-popup {
+    z-index: 10000;
+}
+
+/* navbar stuff */
+.navbar {
+    /* @media screen and (max-width: 1000px) */
+    flex-wrap: wrap;
+    padding: 10px 20px;
+    top: 0;
+    left: 0;
+    gap: 3em;
+    /* REGULAR */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding: 3px 8%;
+    z-index: 500;
+    align-items: center;
+    position: fixed;
+    background-color: var(--background);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.navbar .logo {
+    font-size: xx-large;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+
+    font-weight: 700;
+    margin: 0;
+}
+.navbar .logo a img {
+    margin: 10px;
+    width:75px;
+    /* max-width: 7vw; */
+    -webkit-user-drag: none;
+    transition-timing-function: var(--snappy-bez);
+    transition-property: transform, box-shadow;
+    transition-duration: .6s;
+}
+.navbar .logo a img:hover {
+    transform: scale(1.09);
+    box-shadow: 0px 0px 3px 3px #cccccc2c;
+}
+.menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10%;
+    justify-content: flex-end;
+}
+.user-flow-btn {
+    height: 48;
+    font-size: 1.15rem;
+    font-weight: 500;
+    background-position: 0 -99.99%;
+    background-size: 100% 200%;
+    background-image: linear-gradient(to top, var(--primary) 50%, var(--accent) 50%);
+    /* I USED CHROME DEV TOOLS TO FIND A NICE BEZIER CURVE */
+    transition: var(--snappy-bez) background-position 1s;
+}
+.user-flow-btn:hover {
+    background-position: 0 0;
+}
+#login-btn {
+    background-image: linear-gradient(to top, var(--primary) 50%, var(--accent) 50%);
+}
+#logout-btn {
+    background-image: linear-gradient(to top, var(--danger) 50%, var(--danger-accent) 50%);
+}
+
+form {
+    margin: 0 auto; 
+    width:250px;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.left-label {
+    transform: translate( calc((var(--input-width) * -1) + (var(--input-width) *  .125)), 0);
+}
+
+/* OFFSET HIGHLIGHT */
+.highlight-offset {
+    position: relative;
+}
+.highlight-offset::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    bottom: -1.5px;
+    padding: 0 5px;
+    margin-top: 0.4em;
+    width: 100%;
+    height: 0.9em;
+    background-color: var(--secondary);
+    z-index: -1;
+}
+/* .highlight-offset:hover::before {
+    margin: 0;
+    height: 110%;
+}
+.highlight-offset--secondary::before {
+    background-color: teal;
+} */
+
+.center-container {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+button {
+    padding: 0.5em 2em;
+    border-radius: 6px;
+    border: none;
+    display: inline-block;
+    font-size: var(--p);
+    z-index: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform ease 230ms;
+}
+
+.btn-animation {
+    transition: transform ease 230ms;
+}
+.btn-animation:hover {
+    transform: translate(0, -3px) scale(1.01, 1.01);
+}
+.btn-animation:active {
+    transform: scale(1.01, 1.01);
+}
+
+.primary-btn {
+    background-color: var(--primary);
+    color: var(--background);
+    margin-top: 3px;
+}
+
+.delete-button {
+    width: 240px;
+    margin: 25px 0 0 10%;
+    align-self: center;
+    color: var(--text);
+    background-color: var(--secondary);
+}
+
+input[type=text] {
+    margin: .5rem;
+    width: var(--input-width);
+    height: 2rem;
+}
+
+.invalid-input {
+    border: 1.5px solid;
+    border-color: #c00000;
+    background-color: #ffdddd;
+}
+
+.flex-row {
+    width: 100vw;
+    display: flex;
+    flex-direction: row;
+    place-content: center;
+}
+
+
+/** SWAL AREA */
+.swalProgressBar {
+    background-color: var(--accent);
+}
+
+a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.underlined-link {
+    /* transition: text-decoration-thickness 5s; */
+    display: inline-block;
+  position: relative;
+  /* color: var(--text); */
+}
+.underlined-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleY(-1);
+    height: 2px;
+    bottom: -8px;
+    left: 0;
+    background-color: var(--text);
+    transform-origin: top;
+    transition: transform 0.125s ease-out;
+}
+.underlined-link:hover::after {
+    transform: scaleY(-2.15);
+    transform-origin: top;
+}
+
+
+.header {
+    text-align: center;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted var(--tooltip-color); /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    /* background-color: var(--tooltip-color); */
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+   
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+}
+  
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+.tooltip .tooltiptext {
+    width: 120px;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
+}
+  
+/* At the bottom of the tooltip */
+/* .tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 100%; 
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--tooltip-color) transparent transparent transparent;
+} */
+
+.tooltip .tooltiptext {
+    opacity: 0;
+    transition: opacity 1s;
+}
+  
+.tooltip:hover .tooltiptext {
+    opacity: 1;
+}
+
+table {
+    margin: 0 auto; 
+    margin-top: 30px;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    width: 80%;
+    box-shadow: 0 0 20px 7px rgb(88, 88, 88);
+}
+table thead tr {
+    background-color: var(--primary);
+    color: var(--background);
+    text-align: left;
+}
+
+table th,
+table td {
+    padding: 12px 15px;
+}
+
+table tbody tr {
+    border-bottom: thin solid var(--background);
+}
+
+table tbody tr:nth-of-type(even) {
+    background-color: var(--accent);
+    color: var(--background);
+}
+
+table tbody tr:last-of-type {
+    border-bottom: 2px solid var(--primary);
+}
+
+table tbody tr.active-row {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+tr:target {
+    box-shadow: 0 0 10px 5px var(--text);
+    border: 2px solid white !important;
+}
