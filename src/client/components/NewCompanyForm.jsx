@@ -12,6 +12,7 @@ export function NewCompanyForm(props) {
         setFormError((currentFormError) => {return [false, false]})
         let exit = false
         let localError = [false, false];
+        // throws error if company name is empty
         if (newCompany.name === "") {
             mySwal.fire({
                 icon: "error",
@@ -31,6 +32,7 @@ export function NewCompanyForm(props) {
             
             exit = true;
         }
+        // throws error if email is empty
         if (newCompany.email === "") {
             mySwal.fire({
                 icon: "error",
@@ -50,7 +52,7 @@ export function NewCompanyForm(props) {
 
             exit = true;
         }
-
+        // throws error if not valid email
         if (!newCompany.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
             mySwal.fire({
                 icon: "error",
@@ -74,21 +76,23 @@ export function NewCompanyForm(props) {
 
 
         let randomID = crypto.randomUUID();
-        props.onSubmit({...newCompany, id: randomID})
-        mySwal.fire({
-            icon: "success",
-            toast: true,
-            title: <><a className="underlined-link" href={"#"+randomID}>{newCompany.name}</a> added!</> ,
-            showConfirmButton: false,
-            position: "top-start",
-            timer: 4000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', mySwal.stopTimer)
-                toast.addEventListener('mouseleave', mySwal.resumeTimer)
-            }
+        props.onSubmit({...newCompany, id: randomID}, (response) => {
+            mySwal.fire({
+                icon: "success",
+                toast: true,
+                title: <><a className="underlined-link" href={"#"+randomID}>{newCompany.name}</a> added!</> ,
+                showConfirmButton: false,
+                position: "top-start",
+                timer: 4000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', mySwal.stopTimer)
+                    toast.addEventListener('mouseleave', mySwal.resumeTimer)
+                }
+            })
+    
+            setNewCompany({id: 0, name: "", email: ""})
         })
-        setNewCompany({id: 0, name: "", email: ""})
     }
 
     return <form id="emailForm" onSubmit={handleSubmit}>

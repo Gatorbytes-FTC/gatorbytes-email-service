@@ -1,5 +1,5 @@
 // basic react imports
-import { StrictMode, useState, useEffect } from 'react'
+import { StrictMode, useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
 // style imports
 import Swal from 'sweetalert2'
@@ -8,7 +8,8 @@ import "./static/styles.css"
 // routing imports
 import { Navbar } from './components/Navbar.jsx'
 import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom'
-import Dashboard from './Dashboard.jsx'
+import { Profile } from './Profile.jsx'
+import { Dashboard } from './Dashboard.jsx'
 // authentication imports
 import { GoogleOAuthProvider  } from '@react-oauth/google';
 import { CLIENT_ID } from '../google/config.js'
@@ -44,7 +45,7 @@ function Main() {
         ux_mode: "popup",
         scope: "https://mail.google.com/",
         onSuccess: (tokenResponse) => {
-            axios.post("/login", tokenResponse)
+            axios.post("/api/login", tokenResponse)
             .then((response) => {
                 alert(JSON.stringify(response.data))
                 setUser({id: tokenResponse.authuser, accessToken: tokenResponse.access_token})
@@ -52,7 +53,7 @@ function Main() {
         },
     });
     function logout() {
-        axios.post("/logout", {userID: user.id})
+        axios.post("/api/logout", {userID: user.id})
         .then((response) => {
             alert(JSON.stringify(response.data))
             setUser({id: null, accessToken: null})
@@ -68,12 +69,22 @@ function Main() {
         return user
     }
 
+    const navSpacerRef = useRef(null)
+    const navbarRef = useRef(null)
+    
+    useEffect(() => {
+        navSpacerRef.current.style.height = String(navbarRef.current.offsetHeight)+"px";
+        // navSpacerRef.current.style.height = "100px"
+        console.log(String(navbarRef.current.offsetHeight))
+    })
+
     return <>
-        <Navbar login={login} logout={logout} userLogged={userLogged()} />
-        <br /><br /><br />
+        <Navbar login={login} logout={logout} userLogged={userLogged()} navRef={navbarRef} />
+        <div id="nav-spacer" ref={navSpacerRef}> </div>
         <Router>
             <Routes>
                 <Route exact path="/dashboard" element={<Dashboard />} />
+                <Route exact path="/profile" element={<Profile />} />
             </Routes>
         </Router>
     </>

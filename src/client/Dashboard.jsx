@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
+import axios from 'axios';
 import { NewCompanyForm } from './components/NewCompanyForm'
 import { CompanyTable } from './components/CompanyTable'
 import { Navbar } from './components/Navbar';
 
-export default function Dashboard() {
+export function Dashboard() {
     // email list state that persists
     //* FORMAT: {id, company, address, emailsSent, emailsReceived, Completed}
     const [companyList, setCompanyList] = useState(() => {
@@ -19,10 +20,18 @@ export default function Dashboard() {
     }, [companyList])
 
     // adds email to email list
-    function addCompany(company) {
-        setCompanyList((currentCompanyList) => {
-            return [...currentCompanyList, {id: company.id, company: company.name, address: company.email, emailsSent: 0, emailsReceived: 0, progress: 0}]
-        })
+    function addCompany(company, callback) {
+        //! DATABASE
+        axios.post("/api/add-company", company)
+        .then((response) => {
+            if (response.status !== 201 && response.status !== 200) return
+            //! LOCAL STORAGE
+            setCompanyList((currentCompanyList) => {
+                return [...currentCompanyList, {id: company.id, company: company.name, address: company.email, emailsSent: 0, emailsReceived: 0, progress: 0}]
+            });
+            console.log(JSON.stringify(response.data))
+            callback(response);
+        }) 
     }
 
     //! DEV TOOL ONLY
