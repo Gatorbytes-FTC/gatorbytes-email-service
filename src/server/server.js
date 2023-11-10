@@ -1,20 +1,22 @@
-import { CLIENT_ID, API_KEY, CLIENT_SECRET } from "../google/config.js";
+import { CLIENT_ID, API_KEY, CLIENT_SECRET, DB_URL } from "../google/config.js";
 import express from "express";
 import ViteExpress from "vite-express"
 // ---------------------
-import { writeFile } from "fs";
-import dbFile from "./tmp-db.json" assert {type: "json"}
 import { authenticate } from "@google-cloud/local-auth";
 import { google } from "googleapis";
+// ---------------------
+import { MongoClient, ServerApiVersion } from "mongodb"
+import { writeFile } from "fs";
+import dbFile from "./tmp-db.json" assert {type: "json"}
 
-// EXPRESS + VITE SETUP
+//# EXPRESS + VITE SETUP
 const app = express();
 app.use(express.json())
 ViteExpress.listen(app, 3000, () =>
     console.log("Server is active on http://localhost:3000/dashboard")
 );
 
-// GMAIL API SETUP
+//# GMAIL API SETUP
 const SCOPES = ["https://mail.google.com/"]
 const auth = new google.auth.OAuth2(
     CLIENT_ID,
@@ -28,12 +30,24 @@ function authorizeUser(accessToken) {
     });
     return google.gmail({version: 'v1', auth});
 }
-
-
+//# MONGO DB SETUP
+const mongo = new MongoClient(DB_URL, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
+await mongo.connect();
+console.log('MongoDB connected successully ✅');
+const db = mongo.db("GatorBytes-Email-Service");
+const collection = db.collection("test");
+const response = await collection.find({user: "data"}).toArray()
+console.log(response)
 
 // ! TEMP | USE REAL DB LATER
 // regular routes
-app.post("/login", (req, res) => {
+app.post("/api/login", (req, res) => {
     const userID = req.body.authuser;
     const accessToken = req.body.access_token;
     
@@ -55,8 +69,8 @@ app.post("/login", (req, res) => {
             res.status(201).send("SUCCESSFULLY CREATED USER");
         }
     })
-})
-app.post("/logout", (req, res) => {
+});
+app.post("/api/logout", (req, res) => {
     let userID = req.body.userID;
     console.log(userID)
     delete dbFile[userID];
@@ -69,10 +83,17 @@ app.post("/logout", (req, res) => {
         }
     })
 
-})
+});
 
+app.post("/api/add-company", (req, res) => {
+    let companyID = req.body.id;
+    let companyName = req.body.name;
+    let companyEmail = req.body.companyEmail;
 
-app.post("/send-email", async (req, res) => {
+    res.send(`ADDED ${companyName} TO DATABASE`)
+});
+
+app.post("api/send-email", async (req, res) => {
     // get token from request body and authorize
     let accessToken = req.body.accessToken
     auth.setCredentials({
@@ -107,8 +128,13 @@ app.post("/send-email", async (req, res) => {
         }
     });
     res.send("SUCCESSFULLY SENT EMAIL")
-})
+});
 
 app.get("/ping", (req, res) => {
     res.send("pong");
 });
+
+//! REMOVE LATER THIS IS ONLY FOR RIGHT NOW (LANDING PAGE WILL REPLACE THIS)
+app.get("/", (req, res) => {
+    res.redirect("/dashboard")
+})
