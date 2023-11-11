@@ -2,12 +2,16 @@ import { CLIENT_ID, API_KEY, CLIENT_SECRET, DB_URL } from "../google/config.js";
 import express from "express";
 import ViteExpress from "vite-express"
 // ---------------------
+import axios from "axios";
 import { authenticate } from "@google-cloud/local-auth";
 import { google } from "googleapis";
 // ---------------------
-import { MongoClient, ServerApiVersion } from "mongodb"
+import { MongoClient, ObjectId, ServerApiVersion } from "mongodb"
 import { writeFile } from "fs";
 import dbFile from "./tmp-db.json" assert {type: "json"}
+
+//!!!!!! https://data.crunchbase.com/docs/using-the-api
+//! APIIIIIII FOR COMPANY DATAAAA
 
 //# EXPRESS + VITE SETUP
 const app = express();
@@ -40,25 +44,30 @@ const mongo = new MongoClient(DB_URL, {
 });
 await mongo.connect();
 console.log('MongoDB connected successully ✅');
-const db = mongo.db("GatorBytes-Email-Service");
-const collection = db.collection("test");
-const response = await collection.find({user: "data"}).toArray()
-console.log(response)
+const db = mongo.db("Gatorbytes_Email_Service");
+const usersDB = db.collection("users");
 
-// ! TEMP | USE REAL DB LATER
-// regular routes
-app.post("/api/login", (req, res) => {
+//# ROUTES
+app.post("/api/login", async (req, res) =>  {
     const userID = req.body.authuser;
     const accessToken = req.body.access_token;
-    
-    if (!userID || !accessToken) {
-        res.status(400).send("YOU FORGOT TO INCLUDE 'authuser' or 'access_token' in HTTP request body")
-        return
-    }
-    if (dbFile.hasOwnProperty(userID)) {
-        res.send("EXISTING USER LOGGED IN")
-        return
-    }
+    // gets basic user data (name, email, etc...)
+    let userData = (await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${accessToken}`)).data
+    userData = {username: userData.name, email: userData.email, picture: userData.picture}
+    // res.send(userData.data)
+    // return
+    // error checking
+    // if (!userID || !accessToken) {
+    //     res.status(400).send("YOU FORGOT TO INCLUDE 'authuser' or 'access_token' in HTTP request body")
+    //     return
+    // }
+    // if (dbFile.hasOwnProperty(userID)) {
+    //     res.send("EXISTING USER LOGGED IN")
+    //     return
+    // }
+
+    usersDB.insertOne({_id: userID, ...userData, access_token: accessToken})
+    console.log(usersDB.find({username: "Juan Ponce de Leon"}).toArray())
 
     dbFile[userID] = accessToken;
 

@@ -48,9 +48,11 @@ function Main() {
             axios.post("/api/login", tokenResponse)
             .then((response) => {
                 alert(JSON.stringify(response.data))
+                console.log(response.data)
                 setUser({id: tokenResponse.authuser, accessToken: tokenResponse.access_token})
             })
         },
+        
     });
     function logout() {
         axios.post("/api/logout", {userID: user.id})
@@ -72,11 +74,10 @@ function Main() {
     const navSpacerRef = useRef(null)
     const navbarRef = useRef(null)
     
+    // SETS NAV-SPACER TO SAME HEIGHT AS NAVBAR
     useEffect(() => {
         navSpacerRef.current.style.height = String(navbarRef.current.offsetHeight)+"px";
-        // navSpacerRef.current.style.height = "100px"
-        console.log(String(navbarRef.current.offsetHeight))
-    })
+    });
 
     return <>
         <Navbar login={login} logout={logout} userLogged={userLogged()} navRef={navbarRef} />
@@ -84,9 +85,10 @@ function Main() {
         <Router>
             <Routes>
                 <Route exact path="/dashboard" element={<Dashboard />} />
-                <Route exact path="/profile" element={<Profile />} />
+                <Route exact path="/profile" element={<Profile logout={logout} />} />
             </Routes>
         </Router>
+        <br /><br /><br />
     </>
 }
 

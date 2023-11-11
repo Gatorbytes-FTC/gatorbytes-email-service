@@ -15,6 +15,8 @@
     "express": "^4.18.2",
     "fs": "^0.0.1-security",
     "googleapis": "^105.0.0",
+    "jquery": "^3.7.1",
+    "mongodb": "^6.2.0",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "react": "^18.2.0",
