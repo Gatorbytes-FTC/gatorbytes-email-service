@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# test fukes
+# test file
 test.js
 
 #private config file
