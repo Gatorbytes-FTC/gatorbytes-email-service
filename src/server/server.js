@@ -1,5 +1,5 @@
 import { CLIENT_ID, API_KEY, CLIENT_SECRET, DB_URL } from "../google/config.js";
-import express from "express";
+import express, { response } from "express";
 import ViteExpress from "vite-express"
 // ---------------------
 import axios from "axios";
@@ -7,8 +7,8 @@ import { authenticate } from "@google-cloud/local-auth";
 import { google } from "googleapis";
 // ---------------------
 import { MongoClient, ObjectId, ServerApiVersion } from "mongodb"
-import { writeFile } from "fs";
 import dbFile from "./tmp-db.json" assert {type: "json"}
+import { randomInt } from "crypto";
 
 //!!!!!! https://data.crunchbase.com/docs/using-the-api
 //! APIIIIIII FOR COMPANY DATAAAA
@@ -25,15 +25,10 @@ const SCOPES = ["https://mail.google.com/"]
 const auth = new google.auth.OAuth2(
     CLIENT_ID,
     CLIENT_SECRET,
-    'http://localhost:3000/'
+    'postmessage'
+    // 'http://localhost:3000/oauth2callback'
 );
-// authorize user and return logged in gmail client
-function authorizeUser(accessToken) {
-    auth.setCredentials({
-        access_token: accessToken
-    });
-    return google.gmail({version: 'v1', auth});
-}
+
 //# MONGO DB SETUP
 const mongo = new MongoClient(DB_URL, {
     serverApi: {
@@ -46,62 +41,137 @@ await mongo.connect();
 console.log('MongoDB connected successully ✅');
 const db = mongo.db("Gatorbytes_Email_Service");
 const usersDB = db.collection("users");
+const companiesDB = db.collection("companies")
 
-//# ROUTES
-app.post("/api/login", async (req, res) =>  {
-    const userID = req.body.authuser;
-    const accessToken = req.body.access_token;
-    // gets basic user data (name, email, etc...)
-    let userData = (await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${accessToken}`)).data
-    userData = {username: userData.name, email: userData.email, picture: userData.picture}
-    // res.send(userData.data)
-    // return
-    // error checking
-    // if (!userID || !accessToken) {
-    //     res.status(400).send("YOU FORGOT TO INCLUDE 'authuser' or 'access_token' in HTTP request body")
-    //     return
-    // }
-    // if (dbFile.hasOwnProperty(userID)) {
-    //     res.send("EXISTING USER LOGGED IN")
-    //     return
-    // }
 
-    usersDB.insertOne({_id: userID, ...userData, access_token: accessToken})
-    console.log(usersDB.find({username: "Juan Ponce de Leon"}).toArray())
+//# HELPERS
+function authorizeUser(accessToken) {
+    auth.setCredentials({
+        access_token: accessToken
+    });
+    return google.gmail({version: 'v1', auth});
+}
+async function createUser({userID, authCode, refreshToken, name, email, picture}) {
+    // check if user exists
+    const imaginaryUser = await usersDB.find({_id: userID}).toArray();
+    if (imaginaryUser.length !== 0) {
+        console.log("USER ALREADY EXISTS")
+        return true
+    }
 
-    dbFile[userID] = accessToken;
+    // add new user to database
+    usersDB.insertOne({_id: userID, /*authCode:authCode,*/ refreshToken: refreshToken, name: name, email: email, picture: picture}).then((response)=>{
+        // console.log( usersDB.find({username: "Juan Ponce de Leon"}).toArray())
+        console.log(response);
 
-    writeFile('./src/server/tmp-db.json', JSON.stringify(dbFile, null, 4), err => {
-        if (err) {
-            res.status(500).send("ERROR IN WRITING FILE");
-        } else {
-            res.status(201).send("SUCCESSFULLY CREATED USER");
-        }
+        return true;
+    }).catch((err)=>{
+        return false;
     })
+    
+}
+async function getCompanies(idType, id) {
+    let companies = []
+    const findObj = {}
+    findObj[idType] = id
+    await companiesDB.find(findObj).toArray().then((response) => {
+        companies = response
+    })
+    return companies
+}
+
+//# AUTHENTICATION ROUTES
+app.post("/api/authorize", async (req, res) => {
+    const {code,authuser} = req.body;
+
+    // get ACCESS_TOKEN
+    auth.getToken(code, async (err, tokens) => {
+        if (err) throw new Error()
+
+        // get user information
+        const userData = (await auth.verifyIdToken({
+            idToken: tokens.id_token
+        })).getPayload();
+
+        // gets refresh and access token
+        const refreshToken = tokens.refresh_token;
+        const accessToken = tokens.access_token;
+
+        // create account
+        if (createUser({userID:authuser,  authCode:code,  refreshToken:refreshToken,  name:userData.name,  email:userData.email,  picture:userData.picture}))
+            console.log("NO ERROR")
+        else
+            console.log("ERROR IN CREATING USER")
+
+        // return userID
+        res.send(authuser)
+    });
 });
 app.post("/api/logout", (req, res) => {
     let userID = req.body.userID;
-    console.log(userID)
-    delete dbFile[userID];
+    if (Number.isNaN(userID)) {
+        res.send("NOT LOGGED IN")
+        return
+    }
+    userID = userID.toString()
 
-    writeFile('./src/server/tmp-db.json', JSON.stringify(dbFile, null, 4), err => {
-        if (err) {
-            res.status(500).send("ERROR IN WRITING FILE");
-        } else {
-            res.status(200).send("USER LOGGED OUT");
-        }
+    usersDB.deleteOne({_id: userID}).then((result) => {
+        console.log(result)
+        res.send(`Deleted user ${userID}`)
+    })
+});
+
+//# COMPANY ROUTES
+app.post("/api/add-company", (req, res) => {
+    // get request body
+    const userID = req.body.userID
+    const companyName = req.body.name
+    const companyEmail = req.body.email
+
+    // document to be added to db
+    const document = {
+        userID: userID,
+        companyName: companyName,
+        companyEmail: companyEmail,
+        emailHistory: [],
+        progress: 0
+    }
+
+    // adds company to db
+    companiesDB.insertOne(document).then(async (response1) => {
+        // returns created company
+        console.log(response1)
+        getCompanies("_id", response1.insertedId).then((response2) => {
+            res.status(201).send(response2[0])
+        })
+    })
+    .catch((err) => {
+        res.status(500).send(err)
     })
 
 });
 
-app.post("/api/add-company", (req, res) => {
-    let companyID = req.body.id;
-    let companyName = req.body.name;
-    let companyEmail = req.body.companyEmail;
+app.post("/api/get-companies", (req, res) => {
+    // get userID from request body
+    const userID = req.body.userID
+    
+    // find all companies that belong to userID
+    getCompanies("userID", userID).then((response) => {
+        console.log("GET COMPANY CALLED | " + String(randomInt(10)))
+        res.send(response)
+    })
+})
 
-    res.send(`ADDED ${companyName} TO DATABASE`)
-});
+app.post("/api/delete-company", (req, res) => {
+    const companyID = req.body.companyID
 
+    // deletes the company with the corresponding ID
+    companiesDB.deleteOne({_id: new ObjectId(companyID)}).then((response) => {
+        res.send(response.acknowledged)
+    })
+})
+
+//# EMAIL ROUTES
 app.post("api/send-email", async (req, res) => {
     // get token from request body and authorize
     let accessToken = req.body.accessToken

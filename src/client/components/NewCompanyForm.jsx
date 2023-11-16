@@ -1,97 +1,84 @@
 import { useState } from 'react'
-import { mySwal } from '../main.jsx'
+import { mySwal, toastMessage } from '../main.jsx'
+import { updateTable, updateTableValue } from './CompanyTable.jsx'
+import axios from 'axios'
 
-export function NewCompanyForm(props) {
+export function NewCompanyForm({ setCompanyList }) {
     // email state
-    const [newCompany, setNewCompany] = useState({id: 0,name: "", email: ""})
+    const [newCompany, setNewCompany] = useState({name: "", email: ""})
     const [formError, setFormError] = useState([false, false])
     
     // runs submit function passed from Index.jsx
     function handleSubmit(e) {
         e.preventDefault()
-        setFormError((currentFormError) => {return [false, false]})
+        setFormError(() => {return [false, false]})
         let exit = false
         let localError = [false, false];
         // throws error if company name is empty
         if (newCompany.name === "") {
-            mySwal.fire({
+            toastMessage.fire({
                 icon: "error",
-                toast: true,
-                title: "You left an input empty",
-                showConfirmButton: false,
-                position: "top-start",
-                timer: 4000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', mySwal.stopTimer)
-                    toast.addEventListener('mouseleave', mySwal.resumeTimer)
-                }
+                title: "You left an input empty"
             })
 
             localError[0] = true;
             
             exit = true;
         }
-        // throws error if email is empty
-        if (newCompany.email === "") {
-            mySwal.fire({
-                icon: "error",
-                toast: true,
-                title: "You left an input empty",
-                showConfirmButton: false,
-                position: "top-start",
-                timer: 4000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', mySwal.stopTimer)
-                    toast.addEventListener('mouseleave', mySwal.resumeTimer)
-                }
-            })
-            
-            localError[1] = true;
-
-            exit = true;
-        }
         // throws error if not valid email
         if (!newCompany.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
-            mySwal.fire({
+            toastMessage.fire({
                 icon: "error",
-                toast: true,
-                title: "Please enter a valid email",
-                showConfirmButton: false,
-                position: "top-start",
-                timer: 4000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', mySwal.stopTimer)
-                    toast.addEventListener('mouseleave', mySwal.resumeTimer)
-                }
+                title: "Please enter a valid email"
             })
             localError[1] = true;
             exit = true;
         }
 
+        // after errors are computed, all errors that apply are sent
         setFormError(localError)
         if (exit) return;
 
+        // gets userID
+        const userID = localStorage.getItem("USER")
 
-        let randomID = crypto.randomUUID();
-        props.onSubmit({...newCompany, id: randomID}, (response) => {
-            mySwal.fire({
+        console.log("NEW COMPANY:")
+        console.log({userID, ...newCompany})
+
+        // CREATES NEW COMPANY IN DATABASE
+        axios.post("/api/add-company", {userID, ...newCompany})
+        .then((response) => {
+            // if request failed don't reset (duh)
+            if (response.status !== 201 && response.status !== 200) {
+                toastMessage.fire({
+                    icon:"error",
+                    title: "There was an error in submitting your request",
+                    footer: `error1: ${response.data}`
+                })
+                return
+            }
+
+            // success message
+            toastMessage.fire({
                 icon: "success",
-                toast: true,
-                title: <><a className="underlined-link" href={"#"+randomID}>{newCompany.name}</a> added!</> ,
-                showConfirmButton: false,
-                position: "top-start",
-                timer: 4000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', mySwal.stopTimer)
-                    toast.addEventListener('mouseleave', mySwal.resumeTimer)
-                }
+                title: <><a className="underlined-link" href={"#"+response.data._id}>{newCompany.name}</a> added!</>
             })
     
-            setNewCompany({id: 0, name: "", email: ""})
+            // reset form text
+            setNewCompany({name: "", email: ""})
+
+            // after company is added to database, add locally
+            setCompanyList((currentCompanyList) => {
+                return [...currentCompanyList, response.data]
+            })
+        })
+        .catch((err) => {
+            toastMessage.fire({
+                icon:"error",
+                title: "There was an error in submitting your request",
+                footer: `error2: ${err}`
+            })
+            return
         })
     }
 

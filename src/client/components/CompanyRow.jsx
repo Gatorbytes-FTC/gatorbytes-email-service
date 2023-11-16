@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export function CompanyRow({id, company, address, emailsSent, emailsReceived, progress}) {
+export function CompanyRow({_id, companyName, companyEmail, emailHistory, progress}) {
     // turns progress (int) to user friendly text (string duh)
     function progressToTxt(num) {
         let txt = ""
@@ -22,11 +22,15 @@ export function CompanyRow({id, company, address, emailsSent, emailsReceived, pr
         return <td className={"progress-" + num}>{txt}</td>
     }
 
-    return <tr id={id}>
-        <td>{company}</td>
-        <td>{address}</td>
-        <td>{emailsSent}</td>
-        <td>{emailsReceived}</td>
+    function getSent() {
+        return JSON.stringify(emailHistory)
+    }
+
+    return <tr id={_id}>
+        <td>{companyName}</td>
+        <td>{companyEmail}</td>
+        <td>{getSent()}</td>
+        <td></td>
         {progressToTxt(progress)}
     </tr>
 }

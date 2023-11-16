@@ -1,7 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CompanyRow } from './CompanyRow'
 
-export function CompanyTable({ companyList }) {
+// What the hell bro idek at this point im still learning react lmaoo
+export let updateTableValue = 0
+export function updateTable() {
+    updateTableValue += 1;
+}
+
+
+export function CompanyTable({companyList}) {
     return <table>
         <thead>
             <tr>
@@ -13,9 +20,9 @@ export function CompanyTable({ companyList }) {
             </tr>
         </thead>
         <tbody>
-            {companyList.length === 0 && <tr><i>&nbsp;new companies apear here...</i></tr>}
+            {companyList.length === 0 && <tr><td><i>&nbsp;new companies apear here...</i></td></tr>}
             {companyList.map(company => {
-                return <CompanyRow {...company} key={company.id} />
+                return <CompanyRow {...company} key={company._id} />
             })}
         </tbody>
     </table>
