@@ -138,11 +138,11 @@ app.post("/api/add-company", (req, res) => {
     }
 
     // adds company to db
-    companiesDB.insertOne(document).then(async (response1) => {
+    companiesDB.insertOne(document).then(async (insertResponse) => {
         // returns created company
-        console.log(response1)
-        getCompanies("_id", response1.insertedId).then((response2) => {
-            res.status(201).send(response2[0])
+        console.log(insertResponse)
+        getCompanies("_id", insertResponse.insertedId).then((getResponse) => {
+            res.status(201).send(getResponse[0])
         })
     })
     .catch((err) => {
