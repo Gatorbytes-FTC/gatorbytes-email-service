@@ -2,11 +2,11 @@ import { LoggedNav } from "./LoggedNav"
 import { GuestNav } from "./GuestNav"
 import { useState, useEffect } from "react"
 
-export function Navbar({ login, logout, userLogged, navRef }) {
+export function Navbar({ login, userLogged, navRef }) {
     const [navLinks, setNavLinks] = useState(<></>)
     useEffect(() => {
         if (userLogged) {
-            setNavLinks(<LoggedNav logout={logout} />)
+            setNavLinks(<LoggedNav />)
         }
         else {setNavLinks(<GuestNav login={login} />)}
     }, [userLogged])

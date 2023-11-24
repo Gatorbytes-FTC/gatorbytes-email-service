@@ -7,15 +7,17 @@ export function NewCompanyForm({ setCompanyList }) {
     // email state
     const [newCompany, setNewCompany] = useState({name: "", email: ""})
     const [formError, setFormError] = useState([false, false])
+    const [submitText, setSubmitText] = useState("Add")
     
     // runs submit function passed from Index.jsx
-    function handleSubmit(e) {
+    async function handleSubmit(e, processedNewCompany) {
         e.preventDefault()
         setFormError(() => {return [false, false]})
         let exit = false
         let localError = [false, false];
+
         // throws error if company name is empty
-        if (newCompany.name === "") {
+        if (processedNewCompany.name === "") {
             toastMessage.fire({
                 icon: "error",
                 title: "You left an input empty"
@@ -26,7 +28,7 @@ export function NewCompanyForm({ setCompanyList }) {
             exit = true;
         }
         // throws error if not valid email
-        if (!newCompany.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
+        if (!processedNewCompany.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
             toastMessage.fire({
                 icon: "error",
                 title: "Please enter a valid email"
@@ -41,15 +43,27 @@ export function NewCompanyForm({ setCompanyList }) {
 
         // gets userID
         const userID = localStorage.getItem("USER")
+        // get accessToken
+        const accessToken = localStorage.getItem("ACCESS_TOKEN")
 
         console.log("NEW COMPANY:")
-        console.log({userID, ...newCompany})
+        console.log({userID, ...processedNewCompany})
 
         // CREATES NEW COMPANY IN DATABASE
-        axios.post("/api/add-company", {userID, ...newCompany})
+        await axios.post("/api/add-company", {userID, name: processedNewCompany.name, email: processedNewCompany.email, accessToken: accessToken})
         .then((response) => {
-            // if request failed don't reset (duh)
-            if (response.status !== 201 && response.status !== 200) {
+            // if company already exists
+            console.log(response.data)
+            if (response.status === 200) {
+                console.log("Already exists")
+                toastMessage.fire({
+                    icon:"info",
+                    title: <>You already added <a className="underlined-link" href={"#"+response.data._id}>{processedNewCompany.name}</a></>,
+                })
+                return
+            }
+            // if request failed
+            else if (response.status !== 201) {
                 toastMessage.fire({
                     icon:"error",
                     title: "There was an error in submitting your request",
@@ -57,11 +71,17 @@ export function NewCompanyForm({ setCompanyList }) {
                 })
                 return
             }
+            console.log("Shouldnt run if already exists")
+
+            // set local accessToken
+            console.log("SET LOCAL ACCESS: ")
+            localStorage.setItem("ACCESS_TOKEN", response.data[1])
+            console.log(localStorage.getItem("ACCESS_TOKEN"))
 
             // success message
             toastMessage.fire({
                 icon: "success",
-                title: <><a className="underlined-link" href={"#"+response.data._id}>{newCompany.name}</a> added!</>
+                title: <><a className="underlined-link" href={"#"+response.data[0]._id}>{processedNewCompany.name}</a> added!</>
             })
     
             // reset form text
@@ -69,7 +89,7 @@ export function NewCompanyForm({ setCompanyList }) {
 
             // after company is added to database, add locally
             setCompanyList((currentCompanyList) => {
-                return [...currentCompanyList, response.data]
+                return [...currentCompanyList, response.data[0]]
             })
         })
         .catch((err) => {
@@ -78,11 +98,21 @@ export function NewCompanyForm({ setCompanyList }) {
                 title: "There was an error in submitting your request",
                 footer: `error2: ${err}`
             })
-            return
         })
     }
 
-    return <form id="emailForm" onSubmit={handleSubmit}>
+    return <form id="emailForm" onSubmit={async (e) => {
+            setSubmitText("loading...")
+            // preprocess inputs
+            const preprocessed = {
+                name: newCompany.name.trim(),
+                email: newCompany.email.trim().toLowerCase()
+            }
+            handleSubmit(e, preprocessed).then((response) => {
+                console.log(response)
+                setSubmitText("Add")
+            });
+        }}>
         <span className="flex-row left-label">
             <label className="highlight-offset">Add Company:</label>
         </span>
@@ -99,6 +129,6 @@ export function NewCompanyForm({ setCompanyList }) {
             </span>
         </span>
 
-        <button className="primary-btn btn-animation">Add</button>
+        <button id="submit-btn" className="primary-btn btn-animation">{submitText}</button>
     </form>
 }

@@ -153,6 +153,8 @@ small {font-size: 0.750rem; /* 12px */}
     color: var(--background);
 }
 #login-btn {
+    box-shadow: 0 0 5px 3px var(--accent);
+    /* border: 3px solid var(--accent); */
     background-image: linear-gradient(to top, var(--primary) 50%, var(--accent) 50%);
 }
 #logout-btn {

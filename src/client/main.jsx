@@ -1,15 +1,15 @@
 // basic react imports
 import { StrictMode, useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
-
-
 // style imports
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import "./static/styles.css"
 // routing imports
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import { LoginRequired } from './LoginRequired.jsx'
 import { Navbar } from './components/Navbar.jsx'
-import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom'
+import { LandingPage } from './LandingPage.jsx'
 import { Profile } from './Profile.jsx'
 import { Dashboard } from './Dashboard.jsx'
 // authentication imports
@@ -36,7 +36,8 @@ export let toastMessage = withReactContent(mySwal).mixin({
     didOpen: (toast) => {
         toast.addEventListener('mouseenter', mySwal.stopTimer)
         toast.addEventListener('mouseleave', mySwal.resumeTimer)
-    }
+    },
+    width: "fit-content"
 })
 
 function Main() {
@@ -77,8 +78,7 @@ function Main() {
         })
     }, [])
 
-
-    // login / logout methods
+    // login method (logout is in NewCompanyForm.jsx)
     const login = useGoogleLogin({
         flow: 'auth-code',
         ux_mode: "popup",
@@ -86,19 +86,12 @@ function Main() {
         onSuccess: (tokenResponse) => {
             axios.post("/api/authorize", tokenResponse)
             .then((result) => {
-                alert(result.data)
-                setUser(result.data)
+                setUser(result.data[0])
+                localStorage.setItem("ACCESS_TOKEN", result.data[1])
+                window.open("/dashboard", "_self")
             })
-        },
-        
+        }
     });
-    function logout() {
-        axios.post("/api/logout", {userID: user})
-        .then((result) => {
-            alert(JSON.stringify(result.data))
-            setUser(null)
-        }) 
-    }
 
     // checks if user is logged and if they are then return the user (maybe readonly, could be devasting consequences for attempting to modify)
     function userLogged() {
@@ -116,12 +109,21 @@ function Main() {
     });
 
     return <>
-        <Navbar login={login} logout={logout} userLogged={userLogged()} navRef={navbarRef} />
+        <Navbar login={login} userLogged={userLogged()} navRef={navbarRef} />
         <div id="nav-spacer" ref={navSpacerRef}> </div>
         <Router>
             <Routes>
-                <Route exact path="/dashboard" element={<Dashboard companyList={companyList} setCompanyList={setCompanyList} />} />
-                <Route exact path="/profile" element={<Profile logout={logout} />} />
+                <Route exact path="/" element={<LandingPage />}></Route>
+                <Route exact path="/dashboard" element={
+                    <LoginRequired>
+                        <Dashboard companyList={companyList} setCompanyList={setCompanyList} />
+                    </LoginRequired>
+                } />
+                <Route exact path="/profile" element={
+                    <LoginRequired>
+                        <Profile />
+                    </LoginRequired>
+                } />
             </Routes>
         </Router>
         <br /><br /><br />
