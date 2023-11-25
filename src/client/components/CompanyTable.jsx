@@ -21,7 +21,7 @@ export function CompanyTable({companyList}) {
         </thead>
         <tbody>
             {companyList.length === 0 && <tr><td><i>&nbsp;new companies apear here...</i></td></tr>}
-            {companyList.map(company => {
+            {companyList.map((company) => {
                 return <CompanyRow {...company} key={company._id} />
             })}
         </tbody>

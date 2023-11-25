@@ -5,6 +5,7 @@
     --text: #f1feec;
     --text-secondary: #b3b1b1;
     --background: #1f211e;
+    --background-accent: rgba(255, 255, 255, 0.1);
     --primary: #26c550;
     --secondary: #0d4e13;
     --accent: #96e48b;
@@ -95,7 +96,7 @@ small {font-size: 0.750rem; /* 12px */}
     align-items: center;
     position: fixed;
     background-color: var(--background);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--background-accent);
 }
 #navbar .logo {
     font-size: xx-large;
@@ -168,6 +169,13 @@ small {font-size: 0.750rem; /* 12px */}
 .nav-link:hover {
     color: var(--text);
 }
+.selected-link::before {
+    white-space: nowrap;
+    content: "🐊 ";
+}
+.selected-link#profile-link {
+    padding-left: 10%;
+}
 
 form {
     margin: 0 auto; 
@@ -178,8 +186,80 @@ form {
     gap: 5px;
 }
 
-.left-label {
+#left-label {
     transform: translate( calc((var(--input-width) * -1) + (var(--input-width) *  .125)), 0);
+}
+
+.dropdown-container {
+    margin-top: .25rem;
+    transform: translate( calc((var(--input-width) * 1) + (var(--input-width) *  -.125)), 0);
+    position: absolute;
+}
+.dropdown-button {
+    border-radius: 2px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+
+    /* line-height: 0; */
+}
+
+.dropdown-arrow {
+    display: inline-block;
+    position: absolute;
+    right: 10%;
+}
+.down-arrow {
+    transform: scale(1.25, 1) translateY(-5%);
+    transition: var(--snappy-bez) transform 1s;
+}
+.up-arrow {
+    transform: scale(1.25, -1) translateY(-5%);
+    transition: var(--snappy-bez) transform 1s;
+}
+
+.dropdown-area {
+    position: absolute;
+    background-color: var(--background);
+    border: 2px solid var(--background-accent);
+    border-radius: 5px;
+    color: var(--text);
+    margin-top: 5px;
+    
+    --dropdown-width: 175%;
+    /* --dropdown-width: calc(); */
+    width: var(--dropdown-width);
+    /* to center find the negative difference between the halves */
+    right: calc(-1 * ((var(--dropdown-width) / 2) - 50%));
+}
+
+.dropdown-area-inactive {
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-10px) scale(.96);
+    transition: ease .25s;
+    transition-property: opacity, transform;
+}
+.dropdown-area-active {
+    pointer-events: initial;
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+    transition: ease .35s;
+    transition-property: opacity, transform;
+}
+
+.dropdown-area ul {
+    list-style-type: none;
+    width: 100%;
+    text-align: left;
+    padding: 0;
+    margin: 0;
+}
+.dropdown-area ul li {
+    cursor: pointer;
+    padding: 10px 0 10px 40px;
+}
+.dropdown-area ul li:hover {
+    background-color: var(--background-accent);
 }
 
 /* OFFSET HIGHLIGHT */
@@ -237,7 +317,42 @@ button, .btn {
 .primary-btn {
     background-color: var(--primary);
     color: var(--background);
+}
+.secondary-btn {
+    background-color: var(--secondary);
+    color: var(--text);
+}
+
+
+#submit-btn {
+    margin: 3px 3rem 0 1rem;
+    padding: 0 40px;
+
+    font-weight: 500;
+        }
+#company-settings-btn {
     margin-top: 3px;
+    padding: 0;
+
+    height: 2.5em;
+    width: 2.5em;
+    font-size: 1rem;
+}
+#gear-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    transform: rotate(0deg);
+    transition: var(--snappy-bez) transform 1s;
+}
+#gear-container:hover {
+    transform: rotate(75deg);
+}
+#gear-container img {
+    max-width: 80%;
 }
 
 .delete-button {
@@ -269,7 +384,7 @@ input[type=text] {
 }
 
 
-/** SWAL AREA */
+/*# SWAL AREA */
 .swalProgressBar {
     background-color: var(--accent);
 }
@@ -327,17 +442,23 @@ a {
     position: absolute;
     z-index: 1;
 }
+
+
   
 /* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
 
-.tooltip .tooltiptext {
+.tooltip-top {
     width: 120px;
     bottom: 100%;
     left: 50%;
     margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
+}
+.tooltip-right {
+    top: -5px;
+    left: 105%;
 }
   
 /* At the bottom of the tooltip */

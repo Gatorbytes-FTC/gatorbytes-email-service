@@ -23,25 +23,25 @@ export function CompanyRow({_id, companyName, companyEmail, emailHistory, progre
     }
 
     // PROCESS EMAIL HISTORY TO USABLE NUMBERS
-    let processedHistory = [0, 0];
+    let parsedHistory = [0, 0];
     emailHistory.forEach(email => {
         console.log(email.address)
         console.log(companyEmail)
         console.log(email.address == companyEmail)
         // if email is not from user add one to sent
-        if (email.address == companyEmail) {
-            processedHistory[1] += 1
+        if (email.to == companyEmail) {
+            parsedHistory[0] += 1
         } else {
             // if email is from user add 1 to sent (index 0)
-            processedHistory[0] += 1
+            parsedHistory[1] += 1
         }
     });
 
     return <tr id={_id}>
         <td>{companyName}</td>
         <td>{companyEmail}</td>
-        <td>{processedHistory[0]}</td>
-        <td>{processedHistory[1]}</td>
+        <td>{parsedHistory[0]}</td>
+        <td>{parsedHistory[1]}</td>
         {progressToTxt(progress)}
     </tr>
 }

@@ -52,10 +52,8 @@ async function tokenValid(accessToken) {
     // if getTokenInfo returns error it means access token is invalid (and vice versa)
     try {
         await auth.getTokenInfo(accessToken)
-        console.log("\naccessToken IS valid | " + accessToken)
         return true;
     } catch (error) {
-        console.log("\ngetTokenInfo returned error which means this accesss token is invalid! | " + accessToken);
         return false;
     }
 }
@@ -127,10 +125,10 @@ async function getCompanies(idType, id) {
     })
     return companies
 }
-function fillTemplate(template) {
+function fillTemplate(template, fillOptions) {
     return String(template) + "!";
 }
-async function sendEmail(company, userID, accessToken) {
+async function sendEmail(companyID, companyEmail, companyName, userID, accessToken) {
     // get token from request body and authorize
     const creds = await getCreds(userID, accessToken)
     if (!creds) {
@@ -151,12 +149,12 @@ async function sendEmail(company, userID, accessToken) {
     // compose email
     const emailLines = [
         `From: "${currentUser.name}" <${currentUser.email}>`,
-        `To: ${company.companyEmail}`,
+        `To: ${companyEmail}`,
         "Content-type: text/html;charset=iso-8859-1",
         "MIME-Version: 1.0",
         `Subject: ${fillTemplate(template.subject)}`,
         "",
-        fillTemplate(template.body)
+        fillTemplate(template.body, {name: companyName})
     ];
 
     // join all the lines
@@ -176,11 +174,11 @@ async function sendEmail(company, userID, accessToken) {
         return newAccessToken
     }
     
-    gmail.users.messages.get({
+    await gmail.users.messages.get({
         userId: "me",
         id: sentEmail.data.id
     })
-    .then((response) => {
+    .then(async (response) => {
         if (!response) {
             console.log("Error in getting sent email from Gmail API: " + JSON.stringify(response))
             return
@@ -197,7 +195,7 @@ async function sendEmail(company, userID, accessToken) {
 
         }
 
-        companiesDB.updateOne({_id: company._id}, {$push: {emailHistory: newEmail}})
+        await companiesDB.updateOne({_id: companyID}, {$push: {emailHistory: newEmail}})
     })
 
 
@@ -283,17 +281,20 @@ app.post("/api/add-company", async (req, res) => {
         res.status(500).send(err);
         return
     })
-    // get the company you created
-    const createdCompany = await getCompanies("_id", insertResponse.insertedId)
-    .catch((err) => {
-        console.log("Error in getting created company: " + JSON.stringify(err));
-        res.status(500).send(err);
-        return
-    })
-
+    
     // sends first email to user
-    sendEmail(createdCompany[0], userID, accessToken).then((response) => {
-        console.log("SEND EMAIL RESPONSE: " + JSON.stringify(response))
+    await sendEmail(insertResponse.insertedId, companyName, companyEmail, userID, accessToken).then(async (response) => {
+        // get the company you created
+        const createdCompany = await getCompanies("_id", insertResponse.insertedId)
+        .catch((err) => {
+            console.log("Error in getting created company: " + JSON.stringify(err));
+            res.status(500).send(err);
+            return
+        })
+
+        console.log(createdCompany)
+
+        // response here should be an access token
         res.status(201).send([createdCompany[0], response])
         return
     })

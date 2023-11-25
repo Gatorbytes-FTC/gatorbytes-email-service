@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { mySwal, toastMessage } from '../main.jsx'
 import { updateTable, updateTableValue } from './CompanyTable.jsx'
+import { Dropdown } from "./Dropdown.jsx"
 import axios from 'axios'
 
 export function NewCompanyForm({ setCompanyList }) {
@@ -8,6 +9,16 @@ export function NewCompanyForm({ setCompanyList }) {
     const [newCompany, setNewCompany] = useState({name: "", email: ""})
     const [formError, setFormError] = useState([false, false])
     const [submitText, setSubmitText] = useState("Add")
+    const [selected, setSelected] = useState(() => {
+        // get last template used by user
+        const localValue = localStorage.getItem("LAST_TEMPLATE");
+        if (localValue == null/* || templates.length == 0*/) {
+            localStorage.setItem("LAST_TEMPLATE", "Default")
+            return "Default";
+        }
+        // return user as an int
+        else return localValue; 
+    })
     
     // runs submit function passed from Index.jsx
     async function handleSubmit(e, processedNewCompany) {
@@ -101,7 +112,8 @@ export function NewCompanyForm({ setCompanyList }) {
         })
     }
 
-    return <form id="emailForm" onSubmit={async (e) => {
+    return <form id="emailForm"
+        onSubmit={async (e) => {
             setSubmitText("loading...")
             // preprocess inputs
             const preprocessed = {
@@ -113,22 +125,33 @@ export function NewCompanyForm({ setCompanyList }) {
                 setSubmitText("Add")
             });
         }}>
-        <span className="flex-row left-label">
+
+        <span id="left-label" className="flex-row">
             <label className="highlight-offset">Add Company:</label>
         </span>
 
         <span className="flex-row">
             <span className="tooltip">
-                <span className="tooltiptext">Company Name</span>
+                <span className="tooltiptext tooltip-top">Company Name</span>
                 <input value={newCompany.name} className={formError[0] ? "invalid-input" : ""} onChange={e => setNewCompany((currentCompany) => { return {...currentCompany, name: e.target.value} })} placeholder="Company Name" type="text" id="company-name"/>
             </span>
 
             <span className="tooltip">
-                <span className="tooltiptext">Company Email</span>
+                <span className="tooltiptext tooltip-top">Company Email</span>
                 <input value={newCompany.email} className={formError[1] ? "invalid-input" : ""} onChange={e => setNewCompany((currentCompany) => { return {...currentCompany, email: e.target.value} })} placeholder="Company Email" type="text" id="company-email"/>
             </span>
         </span>
 
-        <button id="submit-btn" className="primary-btn btn-animation">{submitText}</button>
+        <span className="flex-row">
+            <button type="button" id="company-settings-btn" className="btn-animation secondary-btn">
+                <span id="gear-container">
+                    <img src="/src/client/static/gear-white-fill.png" alt="gear-icon" />
+                </span>
+            </button>
+            <button type="submit" id="submit-btn" className="primary-btn btn-animation">{submitText}</button>
+            
+            <Dropdown templates={["Default", "Number 2", "Professional Business", "Friendly Email Template", "WHAT IS THE LIMIT OF THIS THINGY MABOB"]} selected={selected} setSelected={setSelected} />
+            <input id="selected" type="hidden" value={selected} />
+        </span>
     </form>
 }
