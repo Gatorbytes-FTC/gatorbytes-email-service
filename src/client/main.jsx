@@ -59,15 +59,9 @@ function Main() {
         // GET USER ID
         const userID = localStorage.getItem("USER")
         if (userID == null) return
-
         
-        console.log("USER EXISTS: " + userID)
         // GET COMPANIES
         axios.post("/api/get-companies", {userID: userID}).then((response) => {
-            console.log("POST RETURNED: ");
-            console.log(response.data);
-
-
             if (response.data == null) {
                 console.log("ERROR:" + response);
                 return;

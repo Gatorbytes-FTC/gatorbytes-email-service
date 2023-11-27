@@ -1,24 +1,34 @@
 import { useState } from 'react'
-import { mySwal, toastMessage } from '../main.jsx'
-import { updateTable, updateTableValue } from './CompanyTable.jsx'
+import { toastMessage } from '../main.jsx'
+import { CompanySettings } from "./CompanySettings.jsx"
+import { FileInput } from "./FileInput.jsx"
 import { Dropdown } from "./Dropdown.jsx"
 import axios from 'axios'
 
 export function NewCompanyForm({ setCompanyList }) {
     // email state
     const [newCompany, setNewCompany] = useState({name: "", email: ""})
+    // error state
     const [formError, setFormError] = useState([false, false])
+    // text of the add button state
     const [submitText, setSubmitText] = useState("Add")
+    // option selected from the dropdown state
     const [selected, setSelected] = useState(() => {
         // get last template used by user
         const localValue = localStorage.getItem("LAST_TEMPLATE");
-        if (localValue == null/* || templates.length == 0*/) {
+        if (localValue == null/* !!!!!! || templates.length == 0*/) {
+            console.log("selected is null")
             localStorage.setItem("LAST_TEMPLATE", "Default")
             return "Default";
         }
         // return user as an int
         else return localValue; 
     })
+    const [companiesFile, setComaniesFile] = useState(null)
+
+    //# SETTINGS STATE
+    const [notifyResponse, setNotifyResponse] = useState(true)
+
     
     // runs submit function passed from Index.jsx
     async function handleSubmit(e, processedNewCompany) {
@@ -61,7 +71,7 @@ export function NewCompanyForm({ setCompanyList }) {
         console.log({userID, ...processedNewCompany})
 
         // CREATES NEW COMPANY IN DATABASE
-        await axios.post("/api/add-company", {userID, name: processedNewCompany.name, email: processedNewCompany.email, accessToken: accessToken})
+        await axios.post("/api/add-company", {userID, name: processedNewCompany.name, email: processedNewCompany.email, template: selected, accessToken: accessToken})
         .then((response) => {
             // if company already exists
             console.log(response.data)
@@ -143,15 +153,21 @@ export function NewCompanyForm({ setCompanyList }) {
         </span>
 
         <span className="flex-row">
-            <button type="button" id="company-settings-btn" className="btn-animation secondary-btn">
-                <span id="gear-container">
-                    <img src="/src/client/static/gear-white-fill.png" alt="gear-icon" />
-                </span>
-            </button>
+            <CompanySettings notifyResponse={notifyResponse} setNotifyResponse={setNotifyResponse} />
+
             <button type="submit" id="submit-btn" className="primary-btn btn-animation">{submitText}</button>
-            
+
+            <FileInput>
+                <button type="button" id="company-file-btn" className="btn-animation secondary-btn small-img-btn" >
+                    <span id="company-files-container" className="img-btn-container">
+                        <img src="/src/client/static/file.svg" alt="file1" />
+                        <img src="/src/client/static/file.svg" alt="file2" />
+                        <img src="/src/client/static/file.svg" alt="file3" />
+                    </span>
+                </button>
+            </FileInput>
+
             <Dropdown templates={["Default", "Number 2", "Professional Business", "Friendly Email Template", "WHAT IS THE LIMIT OF THIS THINGY MABOB"]} selected={selected} setSelected={setSelected} />
-            <input id="selected" type="hidden" value={selected} />
         </span>
     </form>
 }

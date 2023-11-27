@@ -19,7 +19,7 @@ import { randomInt } from "crypto";
 const app = express();
 app.use(express.json())
 ViteExpress.listen(app, 3000, () =>
-    console.log("Server is active on http://localhost:3000/dashboard")
+console.log("Server is active on http://localhost:3000/dashboard")
 );
 
 //# GMAIL API SETUP
@@ -106,7 +106,7 @@ async function createUser({userID, authCode, refreshToken, name, email, picture}
     }
 
     // add new user to database
-    usersDB.insertOne({_id: userID, /*authCode:authCode,*/ refreshToken: refreshToken, name: name, email: email, picture: picture}).then((response)=>{
+    usersDB.insertOne({_id: userID, refreshToken: refreshToken, name: name, email: email, picture: picture}).then((response)=>{
         console.log(response);
 
         return true;
@@ -252,6 +252,7 @@ app.post("/api/add-company", async (req, res) => {
     const companyName = req.body.name
     const companyEmail = req.body.email
     const accessToken = req.body.accessToken
+    const template = req.body.template
 
     // document to be added to db
     const document = {

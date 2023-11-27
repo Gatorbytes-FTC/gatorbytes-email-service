@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react'
 import { CompanyRow } from './CompanyRow'
 
-// What the hell bro idek at this point im still learning react lmaoo
-export let updateTableValue = 0
-export function updateTable() {
-    updateTableValue += 1;
-}
-
-
 export function CompanyTable({companyList}) {
     return <table>
         <thead>

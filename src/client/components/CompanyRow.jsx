@@ -25,9 +25,6 @@ export function CompanyRow({_id, companyName, companyEmail, emailHistory, progre
     // PROCESS EMAIL HISTORY TO USABLE NUMBERS
     let parsedHistory = [0, 0];
     emailHistory.forEach(email => {
-        console.log(email.address)
-        console.log(companyEmail)
-        console.log(email.address == companyEmail)
         // if email is not from user add one to sent
         if (email.to == companyEmail) {
             parsedHistory[0] += 1

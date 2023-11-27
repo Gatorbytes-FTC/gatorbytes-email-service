@@ -190,6 +190,7 @@ form {
     transform: translate( calc((var(--input-width) * -1) + (var(--input-width) *  .125)), 0);
 }
 
+/*# DROPDOWN STUFF */
 .dropdown-container {
     margin-top: .25rem;
     transform: translate( calc((var(--input-width) * 1) + (var(--input-width) *  -.125)), 0);
@@ -197,16 +198,15 @@ form {
 }
 .dropdown-button {
     border-radius: 2px;
-    padding-left: 3rem;
+    padding-left: 2rem;
     padding-right: 3rem;
-
-    /* line-height: 0; */
 }
 
 .dropdown-arrow {
     display: inline-block;
     position: absolute;
-    right: 10%;
+    /* right: 10%; */
+    right: 25px;
 }
 .down-arrow {
     transform: scale(1.25, 1) translateY(-5%);
@@ -225,8 +225,8 @@ form {
     color: var(--text);
     margin-top: 5px;
     
-    --dropdown-width: 175%;
-    /* --dropdown-width: calc(); */
+    /* --dropdown-width: 175%; */
+    --dropdown-width: calc(100% + 120px);
     width: var(--dropdown-width);
     /* to center find the negative difference between the halves */
     right: calc(-1 * ((var(--dropdown-width) / 2) - 50%));
@@ -240,7 +240,7 @@ form {
     transition-property: opacity, transform;
 }
 .dropdown-area-active {
-    pointer-events: initial;
+    pointer-events: all;
     opacity: 1;
     transform: translateY(0px) scale(1);
     transition: ease .35s;
@@ -325,12 +325,12 @@ button, .btn {
 
 
 #submit-btn {
-    margin: 3px 3rem 0 1rem;
+    margin: 3px 1rem 0 1rem;
     padding: 0 40px;
 
     font-weight: 500;
-        }
-#company-settings-btn {
+}
+.small-img-btn {
     margin-top: 3px;
     padding: 0;
 
@@ -338,21 +338,55 @@ button, .btn {
     width: 2.5em;
     font-size: 1rem;
 }
-#gear-container {
+
+.img-btn-container {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    
+}
+
+#gear-container img {
+    max-width: 80%;
+}
+#gear-container {
     transform: rotate(0deg);
     transition: var(--snappy-bez) transform 1s;
 }
 #gear-container:hover {
     transform: rotate(75deg);
 }
-#gear-container img {
-    max-width: 80%;
+
+#company-files-container img {
+    max-width: 60%;
+}
+
+/** top file */
+#company-files-container img:nth-child(3) {
+    transform: translate(-100%, 0) rotate(0deg);
+    transition: all var(--snappy-bez) .8s;
+}
+#company-files-container:hover img:nth-child(3) {
+    transform: translate(-100%, -8%) rotate(0deg);
+}
+
+/** middle file */
+#company-files-container img:nth-child(2) {
+    transform: translate(0%) rotate(0deg);
+    transition: all var(--snappy-bez) .8s;
+}
+#company-files-container:hover img:nth-child(2) {
+    transform: translate(15%) rotate(18deg);
+}
+
+/** bottom file */
+#company-files-container img:nth-child(1) {
+    transform: translate(100%) rotate(0deg);
+    transition: all var(--snappy-bez) .8s;
+}
+#company-files-container:hover img:nth-child(1) {
+    transform: translate(85%) rotate(-18deg);
 }
 
 .delete-button {
@@ -522,4 +556,92 @@ table tbody tr.active-row {
 tr:target {
     box-shadow: 0 0 10px 5px var(--text);
     border: 2px solid white !important;
+}
+
+/*# TOGGLE STYLE */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    user-select: none;
+    /* position: absolute; */
+}
+
+.toggle-checkbox {
+    display: none;
+}
+
+/* ---- toggle background in active or not active mode ---- */
+.toggle-checkbox:checked~span {
+    background: #14b45c;
+}
+
+.toggle-checkbox:checked~span:after {
+    left: 28px;
+    background: whitesmoke;
+}
+
+.toggle-checkbox:checked~span:active::after {
+    left: 17px;
+    background: whitesmoke;
+}
+
+.toggle-checkbox:not(:checked)~span:active {
+    background: #a3a3a3;
+}
+
+.toggle-checkbox:not(:checked)~span:active::after {
+    background: rgb(248, 248, 248);
+}
+
+.toggle-background {
+    padding: 10px 28.5px;
+    display: flex;
+    align-items: center;
+    width: 58px;
+    height: 32px;
+    position: relative;
+    cursor: pointer;
+    background: #babacc;
+    border-radius: 2em;
+    border: 2px transparent solid;
+    transition: all 0.3s;
+}
+
+/* ---- toggle switching cricle design code ---- */
+.toggle-background::after {
+    
+    content: "";
+    display: flex;
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    left: 0px;
+    top: 0px;
+    border-radius: 50px;
+    background: #f0f5f9;
+    transition: all 0.3s;
+    box-shadow: 2px 2px 5px rgba(110, 110, 110, 0.253);
+}
+
+span:active:after {
+    width: 70%;
+}
+
+/* circle and vertical line in toggle background code */
+.checkbox-circle-icon {
+    position: absolute;
+    right: 15%;
+    border: solid 2px rgb(95, 95, 95);
+    border-radius: 50%;
+    width: 5px;
+    height: 5px;
+    /* transform: translateY(); */
+}
+
+.checkbox-vertical-line {
+    position: absolute;
+    left: 22%;
+    background: rgb(241, 241, 241);
+    width: 2px;
+    height: 8px;
 }

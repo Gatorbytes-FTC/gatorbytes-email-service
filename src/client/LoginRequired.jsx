@@ -10,7 +10,6 @@ export function LoginRequired(props) {
         // this makes the redirect pretty much instantaneous
         redirect("/")
     }
-    console.log(localStorage.getItem("USER"))
     
     return props.children
 }
