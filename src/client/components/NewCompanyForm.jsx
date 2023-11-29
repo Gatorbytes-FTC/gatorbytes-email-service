@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toastMessage } from '../main.jsx'
 import { CompanySettings } from "./CompanySettings.jsx"
-import { FileInput } from "./FileInput.jsx"
+import { PromptFileInput } from "./PromptFileInput.jsx"
 import { Dropdown } from "./Dropdown.jsx"
 import axios from 'axios'
 
@@ -32,7 +32,7 @@ export function NewCompanyForm({ setCompanyList }) {
     
     // runs submit function passed from Index.jsx
     async function handleSubmit(e, processedNewCompany) {
-        e.preventDefault()
+        try {e.preventDefault()} catch {console.log("not a form ")}
         setFormError(() => {return [false, false]})
         let exit = false
         let localError = [false, false];
@@ -157,15 +157,15 @@ export function NewCompanyForm({ setCompanyList }) {
 
             <button type="submit" id="submit-btn" className="primary-btn btn-animation">{submitText}</button>
 
-            <FileInput>
+            <PromptFileInput onUpload={handleSubmit}>
                 <button type="button" id="company-file-btn" className="btn-animation secondary-btn small-img-btn" >
                     <span id="company-files-container" className="img-btn-container">
-                        <img src="/src/client/static/file.svg" alt="file1" />
-                        <img src="/src/client/static/file.svg" alt="file2" />
-                        <img src="/src/client/static/file.svg" alt="file3" />
+                        <img draggable="false" src="/src/client/static/file.svg" alt="file1" />
+                        <img draggable="false" src="/src/client/static/file.svg" alt="file2" />
+                        <img draggable="false" src="/src/client/static/file.svg" alt="file3" />
                     </span>
                 </button>
-            </FileInput>
+            </PromptFileInput>
 
             <Dropdown templates={["Default", "Number 2", "Professional Business", "Friendly Email Template", "WHAT IS THE LIMIT OF THIS THINGY MABOB"]} selected={selected} setSelected={setSelected} />
         </span>

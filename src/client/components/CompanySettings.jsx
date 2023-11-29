@@ -25,7 +25,7 @@ export function CompanySettings({ notifyResponse, setNotifyResponse }) {
     
     return <button type="button" className="btn-animation secondary-btn small-img-btn" onClick={openOptions}>
         <span id="gear-container" className="img-btn-container">
-            <img src="/src/client/static/gear.png" alt="gear-icon" />
+            <img draggable="false" src="/src/client/static/gear.png" alt="gear-icon" />
         </span>
     </button>
 }

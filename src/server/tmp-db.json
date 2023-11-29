@@ -1,3 +1,8 @@
 [
-
+    {
+        "companyName": "Example LLC",
+        "companyEmail": "example@gmail.com",
+        "template": "Example Template Name"
+    },
+    "..."
 ]

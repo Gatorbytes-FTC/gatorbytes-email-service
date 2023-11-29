@@ -24,7 +24,9 @@ export const mySwal = withReactContent(Swal).mixin({
     color: "#ECECEC",
     confirmButtonColor: "#05824a",
     customClass: {
-        timerProgressBar: "swalProgressBar"
+        timerProgressBar: "swalProgressBar",
+        htmlContainer: "swal-html-container",
+        confirmButton: "primary-btn btn-animation"
     }
 })
 export let toastMessage = withReactContent(mySwal).mixin({

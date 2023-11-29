@@ -260,7 +260,8 @@ app.post("/api/add-company", async (req, res) => {
         companyName: companyName,
         companyEmail: companyEmail,
         emailHistory: [],
-        progress: 0
+        progress: 0,
+        template: template
     }
 
     // check if company isnt already added

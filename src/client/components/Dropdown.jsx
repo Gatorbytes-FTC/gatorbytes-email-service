@@ -10,7 +10,7 @@ export function Dropdown({ templates, selected, setSelected }) {
         <span className="tooltip">
             <span className="tooltiptext tooltip-right">Email Template</span>
 
-            <button type="button" class="dropdown-button" onClick={() => {setOpen(!open)} }>
+            <button type="button" className="dropdown-button" onClick={() => {setOpen(!open)} }>
                 {selected}
                 <div className={"dropdown-arrow " + (open ? "up-arrow" : "down-arrow")}>&nbsp;∨</div>
             </button>
