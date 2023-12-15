@@ -345,6 +345,7 @@ button, .btn {
 
 #gear-container img {
     max-width: 80%;
+    user-select: none;
 }
 #gear-container {
     transform: rotate(0deg);
@@ -356,6 +357,7 @@ button, .btn {
 
 #company-files-container img {
     max-width: 60%;
+    user-select: none;
 }
 
 /** top file */
@@ -423,9 +425,15 @@ input[type=text] {
 }
 .swal-html-container {
     overflow: visible !important;
+    /* overflow: hidden; */
     display: flex !important;
     flex-direction: column;
     align-items: center !important;
+}
+.swal-html-container::-webkit-scrollbar {
+    display: none !important;
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important; 
 }
 
 a {
@@ -744,7 +752,7 @@ span:active:after {
 }
 .file-block {
     color: #f7fff7;
-    background-color: var(--primary);
+    background-color: var(--secondary);
     transition: all 1s;
     width: 390px;
     position: relative;
@@ -752,7 +760,8 @@ span:active:after {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin: 10px 0 15px;
+    margin: 15px 0 0px 0;
+    transform: translateY(3.5px);
     padding: 10px 20px;
     border-radius: 25px;
     cursor: pointer;

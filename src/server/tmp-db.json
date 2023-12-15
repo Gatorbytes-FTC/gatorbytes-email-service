@@ -1,8 +1,12 @@
 [
     {
-        "companyName": "Example LLC",
-        "companyEmail": "example@gmail.com",
-        "template": "Example Template Name"
+        "name": "Juanito",
+        "email": "jmaster10ultimate@gmail.com",
+        "template": "test"
     },
-    "..."
+    {
+        "name": "Juanito 2",
+        "email": "gatorroboticsftc@gmail.com",
+        "template": "test2"
+    }
 ]

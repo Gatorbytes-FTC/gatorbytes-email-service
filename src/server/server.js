@@ -51,9 +51,11 @@ const templatesDB = db.collection("templates")
 async function tokenValid(accessToken) {
     // if getTokenInfo returns error it means access token is invalid (and vice versa)
     try {
+        console.log("same token")
         await auth.getTokenInfo(accessToken)
         return true;
     } catch (error) {
+        console.log("different token")
         return false;
     }
 }
@@ -107,8 +109,6 @@ async function createUser({userID, authCode, refreshToken, name, email, picture}
 
     // add new user to database
     usersDB.insertOne({_id: userID, refreshToken: refreshToken, name: name, email: email, picture: picture}).then((response)=>{
-        console.log(response);
-
         return true;
     })
     .catch((err)=>{
@@ -125,10 +125,11 @@ async function getCompanies(idType, id) {
     })
     return companies
 }
+
 function fillTemplate(template, fillOptions) {
     return String(template) + "!";
 }
-async function sendEmail(companyID, companyEmail, companyName, userID, accessToken) {
+async function sendEmail(companyID, companyEmail, companyName, userID, accessToken, selectedTemplate) {
     // get token from request body and authorize
     const creds = await getCreds(userID, accessToken)
     if (!creds) {
@@ -144,8 +145,8 @@ async function sendEmail(companyID, companyEmail, companyName, userID, accessTok
         return accessToken
     }
     
-    const template = await templatesDB.findOne({name: "Default"})
-    
+    const template = selectedTemplate
+
     // compose email
     const emailLines = [
         `From: "${currentUser.name}" <${currentUser.email}>`,
@@ -167,7 +168,7 @@ async function sendEmail(companyID, companyEmail, companyName, userID, accessTok
         }
     })
     .catch((err) => {
-        console.log("ERROR IN SENDING MESSAGE :" + JSON.stringify(err))
+        console.log("ERROR IN SENDING MESSAGE: " + err)
     });
     if (!sentEmail) {
         console.log("'sentEmail' is null: " + JSON.stringify(sentEmail))
@@ -252,7 +253,15 @@ app.post("/api/add-company", async (req, res) => {
     const companyName = req.body.name
     const companyEmail = req.body.email
     const accessToken = req.body.accessToken
-    const template = req.body.template
+    const selectedTemplate = req.body.template
+
+    // get template and check if valid
+    const retrievedTemplate = await templatesDB.findOne({name: selectedTemplate, $or: [{userID: userID}, {userID: "*"}]})
+    
+    if (!retrievedTemplate) {
+        res.status(500).send({message: "Selected template doesn't exist, please contact gatorrobitcsftc@gmail.com if error persists"});
+        return 
+    }
 
     // document to be added to db
     const document = {
@@ -261,7 +270,7 @@ app.post("/api/add-company", async (req, res) => {
         companyEmail: companyEmail,
         emailHistory: [],
         progress: 0,
-        template: template
+        template: retrievedTemplate
     }
 
     // check if company isnt already added
@@ -285,20 +294,27 @@ app.post("/api/add-company", async (req, res) => {
     })
     
     // sends first email to user
-    await sendEmail(insertResponse.insertedId, companyName, companyEmail, userID, accessToken).then(async (response) => {
+    await sendEmail(insertResponse.insertedId, companyEmail, companyName, userID, accessToken).then(async (response) => {
         // get the company you created
-        const createdCompany = await getCompanies("_id", insertResponse.insertedId)
+        await getCompanies("_id", insertResponse.insertedId)
         .catch((err) => {
             console.log("Error in getting created company: " + JSON.stringify(err));
+            companiesDB.deleteOne({_id :insertResponse.insertedId})
             res.status(500).send(err);
-            return
+        }).then((createdCompany) => {
+            console.log(createdCompany)
+            
+            // response here should be an access token
+            res.status(201).send([createdCompany[0], response])
         })
-
-        console.log(createdCompany)
-
-        // response here should be an access token
-        res.status(201).send([createdCompany[0], response])
-        return
+    }).catch(err => {
+        console.log("error sending email: " + err)
+        const undefinedProp = err.toString().match(/'([^']+)'/)
+        if (undefinedProp)
+            res.status(500).send({message: `You forgot to include ${undefinedProp[0]}`});
+        else
+            res.status(500).send(err);
+        companiesDB.deleteOne({_id :insertResponse.insertedId})
     })
 });
 

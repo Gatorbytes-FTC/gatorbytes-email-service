@@ -24,7 +24,7 @@ export function NewCompanyForm({ setCompanyList }) {
         // return user as an int
         else return localValue; 
     })
-    const [companiesFile, setComaniesFile] = useState(null)
+    const [companiesFile, setCompaniesFile] = useState(null)
 
     //# SETTINGS STATE
     const [notifyResponse, setNotifyResponse] = useState(true)
@@ -58,6 +58,10 @@ export function NewCompanyForm({ setCompanyList }) {
             exit = true;
         }
 
+        if (!processedNewCompany.email || !processedNewCompany.name) {
+            throw new Error("error parsing your JSON")
+        }
+
         // after errors are computed, all errors that apply are sent
         setFormError(localError)
         if (exit) return;
@@ -71,7 +75,7 @@ export function NewCompanyForm({ setCompanyList }) {
         console.log({userID, ...processedNewCompany})
 
         // CREATES NEW COMPANY IN DATABASE
-        await axios.post("/api/add-company", {userID, name: processedNewCompany.name, email: processedNewCompany.email, template: selected, accessToken: accessToken})
+        const addCompany = await axios.post("/api/add-company", {userID, name: processedNewCompany.name, email: processedNewCompany.email, template: selected, accessToken: accessToken})
         .then((response) => {
             // if company already exists
             console.log(response.data)
@@ -114,12 +118,19 @@ export function NewCompanyForm({ setCompanyList }) {
             })
         })
         .catch((err) => {
+            console.log("err")
+            console.log({...err})
             toastMessage.fire({
                 icon:"error",
-                title: "There was an error in submitting your request",
-                footer: `error2: ${err}`
+                title: "There was an error adding company",
+                text: err.response.data.message,
+                footer: <>If error persists please contact <a className="underlined-link" target="_blank" rel="noopener noreferrer" href="mailto:gatorroboticsftc@gmail.com">our team</a></>
             })
         })
+
+        console.log("addCompany")
+        console.log(addCompany)
+        return Boolean(addCompany)
     }
 
     return <form id="emailForm"
@@ -160,9 +171,9 @@ export function NewCompanyForm({ setCompanyList }) {
             <PromptFileInput onUpload={handleSubmit}>
                 <button type="button" id="company-file-btn" className="btn-animation secondary-btn small-img-btn" >
                     <span id="company-files-container" className="img-btn-container">
-                        <img draggable="false" src="/src/client/static/file.svg" alt="file1" />
-                        <img draggable="false" src="/src/client/static/file.svg" alt="file2" />
-                        <img draggable="false" src="/src/client/static/file.svg" alt="file3" />
+                        <img draggable={false} src="/src/client/static/file.svg" alt="file1" />
+                        <img draggable={false} src="/src/client/static/file.svg" alt="file2" />
+                        <img draggable={false} src="/src/client/static/file.svg" alt="file3" />
                     </span>
                 </button>
             </PromptFileInput>
